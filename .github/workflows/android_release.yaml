@@ -38,12 +38,11 @@ jobs:
             g++-multilib libc6-dev-i386
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
-          # Remove pre-installed SDK to avoid conflicts, then download Cobalt's SDK
-          sudo rm -rf /usr/local/lib/android/sdk
+          # Give runner ownership of the pre-installed SDK path so download_sdk.sh can manage it
+          sudo chown -R $USER:$USER /usr/local/lib/android/
           bash ./starboard/android/shared/download_sdk.sh
       - name: Set Android env vars
         run: |
-          # Point both ANDROID_HOME and ANDROID_SDK_ROOT to same location
           SDK_DIR="$GITHUB_WORKSPACE/starboard/android/apk"
           echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
           echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
@@ -102,7 +101,7 @@ jobs:
             g++-multilib libc6-dev-i386
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
-          sudo rm -rf /usr/local/lib/android/sdk
+          sudo chown -R $USER:$USER /usr/local/lib/android/
           bash ./starboard/android/shared/download_sdk.sh
       - name: Set Android env vars
         run: |
