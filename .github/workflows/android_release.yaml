@@ -18,6 +18,14 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
+      - name: Set Android env vars
+        run: |
+          # Must be set BEFORE download_sdk.sh so it downloads to a writable location
+          ANDROID_HOME="$GITHUB_WORKSPACE/Android"
+          mkdir -p "$ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "sdk.dir=$ANDROID_HOME" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -38,15 +46,7 @@ jobs:
             g++-multilib libc6-dev-i386
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
-          # Give runner ownership of the pre-installed SDK path so download_sdk.sh can manage it
-          sudo chown -R $USER:$USER /usr/local/lib/android/
           bash ./starboard/android/shared/download_sdk.sh
-      - name: Set Android env vars
-        run: |
-          SDK_DIR="$GITHUB_WORKSPACE/starboard/android/apk"
-          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
-          echo "sdk.dir=$SDK_DIR" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Ensure Android debug keystore exists
         run: |
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
@@ -81,6 +81,13 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
+      - name: Set Android env vars
+        run: |
+          ANDROID_HOME="$GITHUB_WORKSPACE/Android"
+          mkdir -p "$ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "sdk.dir=$ANDROID_HOME" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -101,14 +108,7 @@ jobs:
             g++-multilib libc6-dev-i386
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
-          sudo chown -R $USER:$USER /usr/local/lib/android/
           bash ./starboard/android/shared/download_sdk.sh
-      - name: Set Android env vars
-        run: |
-          SDK_DIR="$GITHUB_WORKSPACE/starboard/android/apk"
-          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
-          echo "sdk.dir=$SDK_DIR" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Ensure Android debug keystore exists
         run: |
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
