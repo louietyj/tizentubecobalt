@@ -18,13 +18,6 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
-      - name: Set Android env vars
-        run: |
-          export ANDROID_HOME="$GITHUB_WORKSPACE/Android"
-          mkdir -p "$ANDROID_HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          unset ANDROID_SDK_ROOT
-          echo "ANDROID_SDK_ROOT=" >> $GITHUB_ENV
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -46,6 +39,15 @@ jobs:
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
           bash ./starboard/android/shared/download_sdk.sh
+      - name: Set Android env vars
+        run: |
+          # Point ANDROID_HOME to where download_sdk.sh placed the SDK
+          # and ensure ANDROID_SDK_ROOT matches to avoid Gradle conflicts
+          SDK_DIR="$GITHUB_WORKSPACE/starboard/android/apk"
+          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
+          # Also write local.properties so Gradle finds the SDK
+          echo "sdk.dir=$SDK_DIR" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Ensure Android debug keystore exists
         run: |
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
@@ -80,13 +82,6 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
-      - name: Set Android env vars
-        run: |
-          export ANDROID_HOME="$GITHUB_WORKSPACE/Android"
-          mkdir -p "$ANDROID_HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          unset ANDROID_SDK_ROOT
-          echo "ANDROID_SDK_ROOT=" >> $GITHUB_ENV
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -108,6 +103,12 @@ jobs:
           ccache --max-size=20G
           bash ./starboard/tools/download_clang.sh
           bash ./starboard/android/shared/download_sdk.sh
+      - name: Set Android env vars
+        run: |
+          SDK_DIR="$GITHUB_WORKSPACE/starboard/android/apk"
+          echo "ANDROID_HOME=$SDK_DIR" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_DIR" >> $GITHUB_ENV
+          echo "sdk.dir=$SDK_DIR" > "$GITHUB_WORKSPACE/starboard/android/apk/local.properties"
       - name: Ensure Android debug keystore exists
         run: |
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
