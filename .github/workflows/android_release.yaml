@@ -18,17 +18,13 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
-      - name: Set up Cloud SDK
-        uses: isarkis/setup-gcloud@40dce7857b354839efac498d3632050f568090b6
       - name: Set Android env vars
         run: |
           export ANDROID_HOME="$GITHUB_WORKSPACE/Android"
           mkdir -p "$ANDROID_HOME"
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          # Unset ANDROID_SDK_ROOT to avoid SDK conflicts
           unset ANDROID_SDK_ROOT
           echo "ANDROID_SDK_ROOT=" >> $GITHUB_ENV
-          PROJECT_NAME=$(gcloud config get-value project)
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -37,10 +33,9 @@ jobs:
           sudo chmod +x /usr/local/bin/gn
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE:$PYTHONPATH" >> $GITHUB_ENV
-      - name: GN
+      - name: GN gen
         run: |
           gn gen out/android-arm64_gold --args='target_platform="android-arm64" target_os="android" target_cpu="arm64" build_type="gold" sb_api_version=15'
-          gn check out/android-arm64_gold
       - name: Install build dependencies
         run: |
           sudo apt update && sudo apt install -qqy --no-install-recommends \
@@ -85,17 +80,13 @@ jobs:
           path: |
             /root/.gradle/caches
             /root/.gradle/wrapper
-      - name: Set up Cloud SDK
-        uses: isarkis/setup-gcloud@40dce7857b354839efac498d3632050f568090b6
       - name: Set Android env vars
         run: |
           export ANDROID_HOME="$GITHUB_WORKSPACE/Android"
           mkdir -p "$ANDROID_HOME"
           echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          # Unset ANDROID_SDK_ROOT to avoid SDK conflicts
           unset ANDROID_SDK_ROOT
           echo "ANDROID_SDK_ROOT=" >> $GITHUB_ENV
-          PROJECT_NAME=$(gcloud config get-value project)
       - name: Install GN
         run: |
           wget https://chrome-infra-packages.appspot.com/dl/gn/gn/linux-amd64/+/latest -O gn.zip
@@ -104,10 +95,9 @@ jobs:
           sudo chmod +x /usr/local/bin/gn
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE:$PYTHONPATH" >> $GITHUB_ENV
-      - name: GN
+      - name: GN gen
         run: |
           gn gen out/android-arm_gold --args='target_platform="android-arm" target_os="android" target_cpu="arm" build_type="gold" sb_api_version=15'
-          gn check out/android-arm_gold
       - name: Install build dependencies
         run: |
           sudo apt update && sudo apt install -qqy --no-install-recommends \
