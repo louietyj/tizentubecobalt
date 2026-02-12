@@ -1238,16 +1238,10 @@ void Document::DispatchOnLoadEvent() {
   // Inject TizenTube.
   scoped_refptr<HTMLHeadElement> current_head = this->head();
 
-  // Get the current unix time in seconds.
-  // This is used to not cache the user script.
-  int64_t current_time = base::Time::Now().ToJavaTime() / 1000;
   scoped_refptr<HTMLScriptElement> script =
       this->CreateElement("script")->AsHTMLElement()->AsHTMLScriptElement();
   script->set_async(true);
-  script->set_src(
-      "https://cdn.jsdelivr.net/npm/@foxreis/tizentube/dist/"
-      "userScript.js?ver=" +
-      std::to_string(current_time));
+  script->set_src("file:///cobalt/assets/web/userScript.js");
 
   current_head->AppendChild(script);
 
