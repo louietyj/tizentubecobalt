@@ -18,4 +18,5 @@ interface H5vccTizenTube {
     boolean SetUserAgent(DOMString user_agent);
     DOMString GetArchitecture();
     void SetFrameRate(long frame_rate);
+    void ShowKeyboard();
 };

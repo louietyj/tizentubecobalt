@@ -104,5 +104,12 @@ void H5vccTizenTube::SetFrameRate(float frame_rate) const {
 #endif
 }
 
+void H5vccTizenTube::ShowKeyboard() const {
+#if defined(ANDROID)
+  JniEnvExt* env = JniEnvExt::Get();
+  env->CallStarboardVoidMethodOrAbort("showSoftKeyboard", "()V");
+#endif
+}
+
 }  // namespace h5vcc
 }  // namespace cobalt

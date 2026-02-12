@@ -899,4 +899,95 @@ public class StarboardBridge {
       ((CobaltActivity) activity).setFrameRate(frameRate);
     }
   }
+
+  /**
+   * Native method to inject a single key event into Cobalt's input pipeline.
+   * The key parameter is an SbKey value (matches ASCII uppercase for letters).
+   */
+  private native void nativeInjectKeyEvent(int key);
+
+  /**
+   * Shows an Android native text input dialog. When the user enters text and
+   * presses OK, the text is injected as individual key events that YouTube TV's
+   * JavaScript will process as search input.
+   */
+  @SuppressWarnings("unused")
+  @UsedByNative
+  protected void showSoftKeyboard() {
+    Activity activity = activityHolder.get();
+    if (activity == null) {
+      Log.w(TAG, "showSoftKeyboard: no activity");
+      return;
+    }
+
+    activity.runOnUiThread(() -> {
+      android.widget.EditText editText = new android.widget.EditText(activity);
+      editText.setInputType(
+          android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+      editText.setHint("Type to search...");
+      editText.setSingleLine(true);
+
+      android.widget.FrameLayout container = new android.widget.FrameLayout(activity);
+      android.widget.FrameLayout.LayoutParams params =
+          new android.widget.FrameLayout.LayoutParams(
+              android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+              android.widget.FrameLayout.LayoutParams.WRAP_CONTENT);
+      params.leftMargin = 48;
+      params.rightMargin = 48;
+      editText.setLayoutParams(params);
+      container.addView(editText);
+
+      android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(activity)
+          .setTitle("Search")
+          .setView(container)
+          .setPositiveButton("Search", (dlg, which) -> {
+            String text = editText.getText().toString();
+            injectTextAsKeyEvents(text);
+          })
+          .setNegativeButton("Cancel", null)
+          .create();
+
+      dialog.show();
+
+      // Auto-show the soft keyboard
+      editText.requestFocus();
+      editText.postDelayed(() -> {
+        android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager)
+                activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+          imm.showSoftInput(editText, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+        }
+      }, 100);
+    });
+  }
+
+  /**
+   * Injects a string as individual SbKey events into Cobalt.
+   * SbKey codes: 'A'-'Z' = 0x41-0x5A, '0'-'9' = 0x30-0x39, Space = 0x20
+   */
+  private void injectTextAsKeyEvents(String text) {
+    if (text == null || text.isEmpty()) return;
+    String upper = text.toUpperCase(Locale.US);
+    for (int i = 0; i < upper.length(); i++) {
+      char c = upper.charAt(i);
+      int sbKey = 0;
+      if (c >= 'A' && c <= 'Z') {
+        sbKey = 0x41 + (c - 'A');  // kSbKeyA through kSbKeyZ
+      } else if (c >= '0' && c <= '9') {
+        sbKey = 0x30 + (c - '0');  // kSbKey0 through kSbKey9
+      } else if (c == ' ') {
+        sbKey = 0x20;  // kSbKeySpace
+      } else if (c == '-') {
+        sbKey = 0xBD;  // kSbKeyOemMinus
+      } else if (c == '.') {
+        sbKey = 0xBE;  // kSbKeyOemPeriod
+      } else if (c == ',') {
+        sbKey = 0xBC;  // kSbKeyOemComma
+      }
+      if (sbKey != 0) {
+        nativeInjectKeyEvent(sbKey);
+      }
+    }
+  }
 }

@@ -51,6 +51,10 @@ class H5vccTizenTube : public script::Wrappable {
   std::string GetArchitecture() const;
   void SetFrameRate(float frame_rate) const;
 
+  // Shows the Android native soft keyboard via a dialog.
+  // Text entered by the user is injected as key events.
+  void ShowKeyboard() const;
+
   DEFINE_WRAPPABLE_TYPE(H5vccTizenTube);
 
  private:
