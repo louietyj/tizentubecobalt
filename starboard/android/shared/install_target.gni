@@ -70,6 +70,7 @@ template("install_target") {
     args = [
       "env",
       "ANDROID_HOME=${android_sdk_path}",
+      "ANDROID_SDK_ROOT=${android_sdk_path}",
       rebase_path(gradle_wrapper, root_build_dir),
       "--project-cache-dir=$project_cache_dir",
       "--project-dir",
