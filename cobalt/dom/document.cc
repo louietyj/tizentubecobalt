@@ -14,6 +14,7 @@
 
 #include "cobalt/dom/document.h"
 
+#include <chrono>
 #include <memory>
 #include <utility>
 
@@ -1238,10 +1239,15 @@ void Document::DispatchOnLoadEvent() {
   // Inject TizenTube.
   scoped_refptr<HTMLHeadElement> current_head = this->head();
 
+  auto current_time =
+      std::chrono::system_clock::now().time_since_epoch().count();
   scoped_refptr<HTMLScriptElement> script =
       this->CreateElement("script")->AsHTMLElement()->AsHTMLScriptElement();
   script->set_async(true);
-  script->set_src("file:///cobalt/assets/web/userScript.js");
+  script->set_src(
+      "https://cdn.jsdelivr.net/gh/louietyj/TizenTube/dist/"
+      "userScript.js?ver=" +
+      std::to_string(current_time));
 
   current_head->AppendChild(script);
 
