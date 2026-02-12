@@ -14,6 +14,7 @@
 
 #include "cobalt/dom/document.h"
 
+#include <chrono>
 #include <memory>
 #include <utility>
 
@@ -1238,14 +1239,13 @@ void Document::DispatchOnLoadEvent() {
   // Inject TizenTube.
   scoped_refptr<HTMLHeadElement> current_head = this->head();
 
-  // Get the current unix time in seconds.
-  // This is used to not cache the user script.
-  int64_t current_time = base::Time::Now().ToJavaTime() / 1000;
+  auto current_time =
+      std::chrono::system_clock::now().time_since_epoch().count();
   scoped_refptr<HTMLScriptElement> script =
       this->CreateElement("script")->AsHTMLElement()->AsHTMLScriptElement();
   script->set_async(true);
   script->set_src(
-      "https://cdn.jsdelivr.net/npm/@foxreis/tizentube/dist/"
+      "https://cdn.jsdelivr.net/gh/louietyj/TizenTube@60a496e/dist/"
       "userScript.js?ver=" +
       std::to_string(current_time));
 
